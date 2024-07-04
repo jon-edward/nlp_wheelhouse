@@ -17,4 +17,4 @@ jobs:
               with:
                 python-version: "3.10"
             - run: python build.py --platform $PLATFORM
-              working-directory: ./app
+              working-directory: app
