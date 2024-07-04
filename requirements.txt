@@ -1,2 +1,2 @@
-tensorflow-cpu
-spacy
+tensorflow-cpu>=2.16.2
+spacy>=3.7.5 
