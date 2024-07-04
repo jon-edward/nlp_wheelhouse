@@ -16,7 +16,11 @@ jobs:
             
             - run: |
                 python -m pip install requests setuptools
-                python build.py
+                python build.py win_amd64 `
+                    -w .\nlp_wheelhouse-win_amd64 `
+                    -s .\setup.py `
+                    -r .\requirements.txt `
+                    -e https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
               name: Building wheel for windows platform
             
             - run: |
