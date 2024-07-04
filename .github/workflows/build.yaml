@@ -15,8 +15,7 @@ jobs:
                 python-version: '3.10'
             
             - run: |
-                python main.py --platform win_amd64 --wheelhouse nlp_wheelhouse-win_amd64 \
-                    --requirements nlp_requirements.txt
+                python main.py --platform win_amd64 --wheelhouse nlp_wheelhouse-win_amd64 --requirements nlp_requirements.txt
               name: Building wheel for windows platform
             
             - uses: softprops/action-gh-release@v2
