@@ -26,8 +26,8 @@ def build(platform: str, wheelhouse_path: Path, setup_script_path: Path, require
     for url in extra_wheel_urls:
         filename = url.split("/")[-1]
         
-        distribution, *_ = filename.split("-")
-        requirements.append(distribution)
+        distribution, whl_version, *_ = filename.split("-")
+        requirements.append(f"{distribution}>={whl_version}")
 
         wheelhouse_path.joinpath(filename).write_bytes(requests.get(url).content)
     
@@ -81,21 +81,16 @@ if __name__ == "__main__":
         "-e",
         type=str,
         nargs="*",
+        default=(),
         help="Adds wheel file urls to final build and their distribution identifier to requirements."
     )
 
     args = parser.parse_args()
 
-    _platform = args.platform
-    _wheelhouse_path = args.wheelhouse_path
-    _setup_script_path = args.setup_script_path
-    _requirements_path = args.requirements_path
-    _extra_wheel_urls = args.extra_wheel_urls
-
     build(
-        platform=_platform,
-        wheelhouse_path=_wheelhouse_path,
-        setup_script_path=_setup_script_path,
-        requirements_path=_requirements_path,
-        extra_wheel_urls=_extra_wheel_urls
+        platform=args.platform,
+        wheelhouse_path=args.wheelhouse_path,
+        setup_script_path=args.setup_script_path,
+        requirements_path=args.requirements_path,
+        extra_wheel_urls=args.extra_wheel_urls
     )
