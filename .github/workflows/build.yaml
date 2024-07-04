@@ -16,4 +16,4 @@ jobs:
               name: Building wheel for windows platform
             - uses: softprops/action-gh-release@v2
               with:
-                files: wheelhouse.zip
+                files: wheelhouse-win_amd64.zip
