@@ -55,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--requirements",
         type=Path,
-        default=Path(__file__).parent.joinpath("nlp_requirements.txt"),
+        default=Path(__file__).parent.joinpath("requirements.txt"),
         help="Requirements file to build from. Copied to wheelhouse directory as 'requirements.txt'."
     )
 
