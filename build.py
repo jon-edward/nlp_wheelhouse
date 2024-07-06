@@ -1,40 +1,41 @@
+import glob
+import logging
 from pathlib import Path
 import shutil
 import subprocess
 import sys
-from typing import Iterable
-
-import requests
 
 
-def build(platform: str, wheelhouse_path: Path, setup_script_path: Path, requirements_path: Path, extra_wheel_urls: Iterable[str]):
-    wheelhouse_path.mkdir(exist_ok=True)
+def create_wheelhouse(platform: str, wheelhouse_path: Path, requirements_path: Path):
+    wheelhouse_path.mkdir(parents=True, exist_ok=True)
 
-    platform_ident = ()
+    platform_subcommand = ()
 
     if platform:
-        platform_ident = "--platform", platform
+        platform_subcommand = "--platform", platform
+
+    py_args = [
+        sys.executable, "-m", "pip", "download", *platform_subcommand, 
+        "-d", str(wheelhouse_path), "--only-binary=:all:", 
+        "-r", str(requirements_path), "--no-cache-dir"
+    ]
+
+    logging.info("Running command: %s", " ".join(py_args))
     
-    subprocess.check_call([
-        sys.executable, "-m", "pip", "download", ".", 
-        *platform_ident, "-d", str(wheelhouse_path), "--only-binary=:all:"
-    ])
+    subprocess.check_call(py_args)
 
-    with requirements_path.open() as f:
-        requirements = [x.strip() for x in f.readlines() if x.strip()]
+    shutil.make_archive(wheelhouse_path.name, "zip", wheelhouse_path)
 
-    for url in extra_wheel_urls:
-        filename = url.split("/")[-1]
-        
-        distribution, whl_version, *_ = filename.split("-")
-        requirements.append(f"{distribution}>={whl_version}")
 
-        wheelhouse_path.joinpath(filename).write_bytes(requests.get(url).content)
-    
-    wheelhouse_path.joinpath("setup.py").write_text(setup_script_path.read_text())
-    wheelhouse_path.joinpath("requirements.txt").write_text("\n".join(requirements))
+def install(wheelhouse_path: Path, requirements_path: Path):
+    py_args = [
+        sys.executable, "-m", "pip", "install", f"--find-links={str(wheelhouse_path)}", 
+        "--no-index", "-r", str(requirements_path)
+    ]
 
-    shutil.make_archive(wheelhouse_path.name, "zip", root_dir=wheelhouse_path)
+    logging.info("Running command: %s", " ".join(py_args))
+
+    subprocess.check_call(py_args)
 
 
 if __name__ == "__main__":
@@ -53,44 +54,26 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--wheelhouse-path",
-        "-w",
-        type=Path,
-        default=_current_directory.joinpath("nlp_wheelhouse"),
-        help="Where to download the wheelhouse directory."
-    )
-
-    parser.add_argument(
-        "--setup-script-path",
-        "-s",
-        type=Path,
-        default=_current_directory.joinpath("setup.py"),
-        help="Where to copy the setup script from."
-    )
-
-    parser.add_argument(
-        "--requirements-path",
-        "-r",
-        type=Path,
-        default=_current_directory.joinpath("requirements.txt"),
-        help="Where to copy requirements from."
-    )
-
-    parser.add_argument(
-        "--extra_wheel_urls",
-        "-e",
-        type=str,
-        nargs="*",
-        default=(),
-        help="Adds wheel file urls to final build and their distribution identifier to requirements."
+        "--install",
+        action="store_true",
+        default=False,
+        help="It provided, installs all wheelhouses after creation. Should only be used for testing."
     )
 
     args = parser.parse_args()
 
-    build(
-        platform=args.platform,
-        wheelhouse_path=args.wheelhouse_path,
-        setup_script_path=args.setup_script_path,
-        requirements_path=args.requirements_path,
-        extra_wheel_urls=args.extra_wheel_urls
-    )
+    _platform = args.platform
+
+    for file_name in glob.glob(str(_current_directory.joinpath("wheel_requirements", "*_requirements.txt"))):
+        _requirements_path = Path(file_name)
+        wheelhouse_identifier, *_ = _requirements_path.name.split("_")
+
+        _wheelhouse_path = _current_directory.joinpath(f"{wheelhouse_identifier}_wheels")
+        wheelhouse_path_out = _wheelhouse_path.joinpath(_wheelhouse_path.name)
+
+        create_wheelhouse(_platform, wheelhouse_path_out, _requirements_path)
+
+        shutil.make_archive(_wheelhouse_path.name, "zip", _wheelhouse_path)
+
+        if args.install:
+            install(wheelhouse_path_out, _requirements_path)
