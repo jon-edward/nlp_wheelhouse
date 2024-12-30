@@ -9,14 +9,10 @@ class TestMLImports(TestCase):
         nlp_en_blank = spacy.blank("en")
 
         self.assertIsInstance(nlp_en_blank, Language)
-    
-    def test_tensorflow(self):
-        import tensorflow as tf
 
-        hello_world = b"Hello, Tensorflow!"
-        hello_tensor = tf.constant(hello_world)
-
-        self.assertEqual(tf.get_static_value(hello_tensor), hello_world)
+    def test_torch(self):
+        import torch
+        self.assertIsInstance(torch.cuda.is_available(), bool)
 
     def test_spacy_en_core_web_sm(self):
         import spacy

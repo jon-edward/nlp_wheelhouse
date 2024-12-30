@@ -1,5 +1,11 @@
+# Libraries required for machine learning
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio
+transformers~=4.47.1
+evaluate~=0.4.3
 spacy==3.7.5
-tensorflow-cpu==2.16.2
  
 # spaCy models
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz#egg=en_core_web_sm
