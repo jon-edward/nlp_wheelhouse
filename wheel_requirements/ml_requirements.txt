@@ -8,6 +8,7 @@ evaluate~=0.4.3
 spacy==3.7.5
 scikit-learn~=1.6.1
 tensorboardX~=2.6.2.2
+accelerate>=0.12.0
  
 # spaCy models
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz#egg=en_core_web_sm
